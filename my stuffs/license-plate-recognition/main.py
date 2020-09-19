@@ -5,13 +5,13 @@ import numpy as np
 
 pytesseract.pytesseract.tesseract_cmd = r'D:\Program Files\Tesseract-OCR\tesseract.exe'
 
-img = cv2.imread("1.png", cv2.IMREAD_COLOR)
-img = cv2.resize(img, (600, 400))
+image = cv2.imread("1.png", cv2.IMREAD_COLOR)
+image = cv2.resize(image, (600, 400))
 
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-gray = cv2.bilateralFilter(gray, 13, 15, 15)
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+gray_image = cv2.bilateralFilter(gray_image, 13, 15, 15)
 
-edged = cv2.Canny(gray, 30, 200)
+edged = cv2.Canny(gray_image, 30, 200)
 contours = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 contours = imutils.grab_contours(contours)
 contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
@@ -33,24 +33,23 @@ else:
     detected = 1
 
 if detected == 1:
-    cv2.drawContours(img, [screenCnt], -1, (0, 0, 255), 3)
+    cv2.drawContours(image, [screenCnt], -1, (0, 0, 255), 3)
 
-mask = np.zeros(gray.shape, np.uint8)
+mask = np.zeros(gray_image.shape, np.uint8)
 new_image = cv2.drawContours(mask, [screenCnt], 0, 255, -1, )
-new_image = cv2.bitwise_and(img, img, mask=mask)
+new_image = cv2.bitwise_and(image, image, mask=mask)
 
 (x, y) = np.where(mask == 255)
 (topx, topy) = (np.min(x), np.min(y))
 (bottomx, bottomy) = (np.max(x), np.max(y))
-Cropped = gray[topx:bottomx + 1, topy:bottomy + 1]
+cropped_image = gray_image[topx:bottomx + 1, topy:bottomy + 1]
 
-text = pytesseract.image_to_string(Cropped, config='--psm 11')
-print("Detected license plate Number is:", text)
-img = cv2.resize(img, (500, 300))
-Cropped = cv2.resize(Cropped, (400, 200))
-cv2.imshow("img",img)
-cv2.imshow("cropped",Cropped)
+detected_text = pytesseract.image_to_string(cropped_image, config='--psm 11')
+print("Detected license plate Number is: ", detected_text)
+image = cv2.resize(image, (500, 300))
+cropped_image = cv2.resize(cropped_image, (400, 200))
+cv2.imshow("image",image)
+cv2.imshow("cropped_image",cropped_image)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
